@@ -1,34 +1,33 @@
 package io.mk.pool.sample.simple.test;
 
 import io.mk.pool.BorrowSt;
-import io.mk.pool.SimpleLockFreeObjectPool;
+import io.mk.pool.KeyedSimpleLockFreeObjectPool;
 import io.mk.pool.compare.SampleCounter;
-import io.mk.pool.compare.commospool.SimpleFactory;
-import io.mk.pool.compare.commospool2.SimpleFactory2;
-import io.mk.pool.compare.lockfree.SampleCounterController;
+import io.mk.pool.compare.commospool.KeyedSimpleFactory;
+import io.mk.pool.compare.commospool2.KeyedSimpleFactory2;
+import io.mk.pool.compare.lockfree.KeyedSampleCounterControllerFactory;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicLong;
 
-import org.apache.commons.pool.ObjectPool;
+import org.apache.commons.pool.impl.GenericKeyedObjectPool;
 import org.apache.commons.pool.impl.GenericObjectPool;
-import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
 
 
-public class ComparePoolPefromanceTest {
+public class CompareKeyedPoolPefromanceTest {
 
 	@Option(name="-h", usage="help")
 	public static boolean help;
 
 	@Option(name="-t", metaVar="th_num", usage="threads count")
-	public static int th_num = 200;
+	public static int th_num = 100;
 
 	
 	@Option(name="-p", metaVar="poolSize", usage="pool Size")
-	public static int poolSize = 1000;
+	public static int poolSize = 1;
 	
 
 	@Option(name="-d", metaVar="duration", usage="duration(ms)")
@@ -44,7 +43,7 @@ public class ComparePoolPefromanceTest {
 	public static void main(String[] args) throws Exception {
 		
 		// parse argument
-		ComparePoolPefromanceTest app = new ComparePoolPefromanceTest();
+		CompareKeyedPoolPefromanceTest app = new CompareKeyedPoolPefromanceTest();
         CmdLineParser parser = new CmdLineParser(app);
         try {
             parser.parseArgument(args);    
@@ -67,19 +66,19 @@ public class ComparePoolPefromanceTest {
 	
 	private static void testCommonsPool() throws Exception {
 		
-		final SimpleFactory factory = new SimpleFactory();
-		final ObjectPool<SampleCounter> pool = new GenericObjectPool<SampleCounter>(factory, poolSize, 
+		final KeyedSimpleFactory factory = new KeyedSimpleFactory();
+		final GenericKeyedObjectPool<Integer, SampleCounter> pool = new GenericKeyedObjectPool<Integer, SampleCounter>(factory, poolSize, 
 				GenericObjectPool.WHEN_EXHAUSTED_BLOCK,
 				GenericObjectPool.DEFAULT_MAX_WAIT,
 				poolSize,
-				GenericObjectPool.DEFAULT_MIN_IDLE,
 				GenericObjectPool.DEFAULT_TEST_ON_BORROW,
 				GenericObjectPool.DEFAULT_TEST_ON_RETURN,
 				GenericObjectPool.DEFAULT_TIME_BETWEEN_EVICTION_RUNS_MILLIS,
 				GenericObjectPool.DEFAULT_NUM_TESTS_PER_EVICTION_RUN, 
 				GenericObjectPool.DEFAULT_MIN_EVICTABLE_IDLE_TIME_MILLIS,
 				GenericObjectPool.DEFAULT_TEST_WHILE_IDLE);
-		
+        
+        
 		System.out.println("START");
 
 		
@@ -98,9 +97,10 @@ public class ComparePoolPefromanceTest {
 						long end = start + time;
 						while(System.currentTimeMillis() < end) {
 
+							int key = (int)localCount % 10;
 							SampleCounter counter = null;
 							try {
-								counter = pool.borrowObject();
+								counter = pool.borrowObject(key);
 								
 								counter.increment();
 								
@@ -110,7 +110,7 @@ public class ComparePoolPefromanceTest {
 								
 							} finally {
 								if(counter != null) {
-									pool.returnObject(counter);
+									pool.returnObject(key, counter);
 								}
 							}
 							
@@ -154,13 +154,14 @@ public class ComparePoolPefromanceTest {
 
 	private static void testCommonsPool2() throws Exception {
 		
-		GenericObjectPoolConfig config = new GenericObjectPoolConfig();
-		config.setMaxTotal(poolSize);
-		config.setMaxIdle(-1);
+		org.apache.commons.pool2.impl.GenericKeyedObjectPoolConfig config = new org.apache.commons.pool2.impl.GenericKeyedObjectPoolConfig();
+		config.setMaxTotal(-1);
+		config.setMaxIdlePerKey(-1);
+		config.setMaxTotalPerKey(poolSize);
 		config.setBlockWhenExhausted(true);
 		
-		final SimpleFactory2 factory = new SimpleFactory2();
-		final org.apache.commons.pool2.ObjectPool<SampleCounter> pool = new org.apache.commons.pool2.impl.GenericObjectPool<SampleCounter>(factory, config);
+		final KeyedSimpleFactory2 factory = new KeyedSimpleFactory2();
+		final org.apache.commons.pool2.impl.GenericKeyedObjectPool<Integer, SampleCounter> pool = new org.apache.commons.pool2.impl.GenericKeyedObjectPool<Integer, SampleCounter>(factory, config);
 		
 		System.out.println("START");
 
@@ -180,9 +181,10 @@ public class ComparePoolPefromanceTest {
 						long end = start + time;
 						while(System.currentTimeMillis() < end) {
 
+							int key = (int)localCount % 10;
 							SampleCounter counter = null;
 							try {
-								counter = pool.borrowObject();
+								counter = pool.borrowObject(key);
 								
 								counter.increment();
 								
@@ -192,7 +194,7 @@ public class ComparePoolPefromanceTest {
 								
 							} finally {
 								if(counter != null) {
-									pool.returnObject(counter);
+									pool.returnObject(key, counter);
 								}
 							}
 							
@@ -236,8 +238,8 @@ public class ComparePoolPefromanceTest {
 
 	private static void testLockFree() throws Exception {
 		
-		final SampleCounterController controller = new SampleCounterController();
-		final SimpleLockFreeObjectPool<SampleCounter> pool = new SimpleLockFreeObjectPool<SampleCounter>(poolSize, controller, st);		
+		final KeyedSampleCounterControllerFactory controller = new KeyedSampleCounterControllerFactory();
+		final KeyedSimpleLockFreeObjectPool<Integer, SampleCounter> pool = new KeyedSimpleLockFreeObjectPool<Integer, SampleCounter>(poolSize, controller, st);		
 		
 		System.out.println("START");
 
@@ -257,9 +259,10 @@ public class ComparePoolPefromanceTest {
 						long end = start + time;
 						while(System.currentTimeMillis() < end) {
 
+							int key = (int)localCount % 10;
 							SampleCounter counter = null;
 							try {
-								counter = pool.borrow();
+								counter = pool.borrow(key);
 								
 								counter.increment();
 								
@@ -269,7 +272,7 @@ public class ComparePoolPefromanceTest {
 								
 							} finally {
 								if(counter != null) {
-									pool.release(counter);
+									pool.release(key, counter);
 								}
 							}
 							
@@ -296,17 +299,12 @@ public class ComparePoolPefromanceTest {
 		
 		long ela = end - start;
 		
-		System.out.println("pool.getCreateCount          = " + pool.getCreateCount());
-		System.out.println("pool.getObjectCount()        = " + pool.getObjectCount());
-		System.out.println("pool.getDestroyCount()       = " + pool.getDestroyCount());
-		System.out.println("pool.getCreationErrorCount() = " + pool.getCreationErrorCount());
 		
 		pool.destroy();
 		
 		System.out.println(String.format("Exec time = %s ms" , String.format("%,d", ela )));
 		System.out.println(String.format("%4s Threads : throghput = %12s", th_num, String.format("%,d",  (long)(((double)count.get())*1000d/ela) )));
 		System.out.println(String.format("Exec sum    = %12s", String.format("%,d",  count.get() )));
-		System.out.println(String.format("Counter sum = %12s", String.format("%,d", controller.getTotal())));
 		
 
 	}
