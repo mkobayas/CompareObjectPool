@@ -3,7 +3,7 @@ CompareObjectPool
 
 
 
-[1 Thread]
+
 | poolsize 	| Commons Pool 	| Commos Pool2 	| SimpleLockFreeObjectPool 	|
 |:--------:	|:------------:	|:------------:	|:------------------------:	|
 |        1 	|    3,320,464 	|    3,880,341 	|               15,920,249 	|
