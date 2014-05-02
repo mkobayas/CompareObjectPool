@@ -51,3 +51,16 @@ OpenJDK 1.7.0_19
 |       10 |      100,525 |      108,979 |                6,438,195 |
 |      100 |      101,144 |      217,707 |                6,677,660 |
 |    1,000 |      519,062 |      826,231 |                6,917,719 |
+
+## 1000 Threads with sleep 1 ms per borrow
+
+This scenario cause very high hard interupt and context switch.
+Maximum transaction is 1,000,000 tps in the ideal situation.
+
+| poolsize | Commons Pool | Commos Pool2 | SimpleLockFreeObjectPool |
+|:--------:|:------------:|:------------:|:------------------------:|
+|        1 |          853 |          850 |                      875 |
+|       10 |        8,428 |        9,168 |                    9,042 |
+|      100 |       69,037 |       84,582 |                   93,259 |
+|    1,000 |      208,188 |      297,538 |                  875,781 |
+
