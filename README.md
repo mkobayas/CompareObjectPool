@@ -54,7 +54,7 @@ OpenJDK 1.7.0_19
 
 ## 1000 Threads with sleep 1 ms per borrow
 
-This scenario cause very high hard interupt and context switch.  
+This scenario cause very high hard interrupt and context switch.  
 Maximum transaction is 1,000,000 tps in the ideal situation.  
 
 | poolsize | Commons Pool | Commos Pool2 | SimpleLockFreeObjectPool |
