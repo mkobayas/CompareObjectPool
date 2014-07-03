@@ -1,11 +1,7 @@
-package io.mk.pool.sample.simple.test;
+package org.mk300.pool.sample.simple.test;
 
-import io.mk.pool.BorrowSt;
-import io.mk.pool.KeyedSimpleLockFreeObjectPool;
-import io.mk.pool.compare.SampleCounter;
-import io.mk.pool.compare.commospool.KeyedSimpleFactory;
-import io.mk.pool.compare.commospool2.KeyedSimpleFactory2;
-import io.mk.pool.compare.lockfree.KeyedSampleCounterControllerFactory;
+import org.mk300.pool.BorrowSt;
+import org.mk300.pool.KeyedSimpleLockFreeObjectPool;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicLong;
@@ -15,6 +11,10 @@ import org.apache.commons.pool.impl.GenericObjectPool;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
+import org.mk300.pool.compare.SampleCounter;
+import org.mk300.pool.compare.commospool.KeyedSimpleFactory;
+import org.mk300.pool.compare.commospool2.KeyedSimpleFactory2;
+import org.mk300.pool.compare.lockfree.KeyedSampleCounterControllerFactory;
 
 
 public class CompareKeyedPoolPefromanceTest {

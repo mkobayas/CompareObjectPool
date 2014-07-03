@@ -1,4 +1,4 @@
-package io.mk.pool.compare;
+package org.mk300.pool.compare;
 
 public class SampleCounter {
 

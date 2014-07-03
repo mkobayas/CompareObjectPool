@@ -1,12 +1,12 @@
-package io.mk.pool.compare.commospool2;
+package org.mk300.pool.compare.commospool2;
 
 import java.util.concurrent.atomic.AtomicLong;
 
-import io.mk.pool.compare.SampleCounter;
 
 import org.apache.commons.pool2.BasePooledObjectFactory;
 import org.apache.commons.pool2.PooledObject;
 import org.apache.commons.pool2.impl.DefaultPooledObject;
+import org.mk300.pool.compare.SampleCounter;
 
 public class SimpleFactory2 extends BasePooledObjectFactory<SampleCounter> {
 

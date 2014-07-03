@@ -1,10 +1,11 @@
-package io.mk.pool.compare.lockfree;
+package org.mk300.pool.compare.lockfree;
 
-import io.mk.pool.ObjectController;
-import io.mk.pool.compare.SampleCounter;
+import org.mk300.pool.ObjectController;
+import org.mk300.pool.compare.SampleCounter;
 
 public class KeyedSampleCounterController implements ObjectController<SampleCounter> {
 	
+	@SuppressWarnings("unused")
 	private final int key;
 	
 	public KeyedSampleCounterController(int key) {
